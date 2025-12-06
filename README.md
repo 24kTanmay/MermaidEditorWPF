@@ -2,6 +2,18 @@
 
 A WPF application for creating and rendering Mermaid diagrams with live preview, zoom & pan support, and Dark Mode.
 
+## 📐 Code Architecture
+
+For developers: Check out **[CODEBASE_ARCHITECTURE.mmd](CODEBASE_ARCHITECTURE.mmd)** - A comprehensive Mermaid diagram documenting the entire codebase workflow, including:
+- Application initialization and module structure
+- File operations and tab management
+- Editor features and rendering pipeline
+- Pan/zoom and mode toggle functionality
+- Export system and theme handling
+- All keyboard shortcuts and event flows
+
+Open this file in the Mermaid Editor itself to visualize the complete architecture!
+
 ## Features
 - ? Syntax highlighting with AvalonEdit (line numbers, undo/redo)
 - ? Live preview using WebView2
