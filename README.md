@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/repo-logo.png" alt="Mermaid Editor Logo" width="200"/>
+  <img src="docs/repo-logo.svg" alt="Mermaid Editor Logo" width="200"/>
 </p>
 
 # Mermaid Diagram Editor
