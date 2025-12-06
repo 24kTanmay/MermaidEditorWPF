@@ -15,14 +15,19 @@ For developers: Check out **[CODEBASE_ARCHITECTURE.mmd](CODEBASE_ARCHITECTURE.mm
 Open this file in the Mermaid Editor itself to visualize the complete architecture!
 
 ## Features
-- ? Syntax highlighting with AvalonEdit (line numbers, undo/redo)
-- ? Live preview using WebView2
-- ? **Dark Mode** - Toggle between light and dark themes for UI and diagrams
-- ? **Zoom & Pan controls** - Mouse wheel zoom, click & drag to pan, double-click to reset
-- ? **Keyboard shortcuts** - Ctrl+S (Save), F5 (Render), Ctrl+/- (Font size)
-- ? **Font size controls** - Adjust editor font size with toolbar buttons or keyboard
-- ? Export to SVG and PNG
-- ? Open/Save .mmd files
+- ✅ Syntax highlighting with AvalonEdit (line numbers, undo/redo)
+- ✅ Live preview using WebView2
+- ✅ **Dark Mode** - Toggle between light and dark themes for UI and diagrams
+- ✅ **Zoom & Pan controls** - Mouse wheel zoom, click & drag to pan, double-click to reset
+- ✅ **Pan/Select modes** - Switch between panning (H) and text selection (V)
+- ✅ **Keyboard shortcuts** - Extensive shortcuts for all operations
+- ✅ **Font size controls** - Adjust editor font size with toolbar buttons or keyboard
+- ✅ **Multi-tab support** - Work with multiple diagrams simultaneously
+- ✅ Export to SVG and PNG
+- ✅ Open/Save .mmd files
+- ✅ Recent files menu
+- ✅ Find and Replace
+- ✅ Go to Line
 
 ## Setup Instructions
 
@@ -48,9 +53,9 @@ Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg
 2. Line numbers and syntax highlighting are enabled by default
 3. Use Ctrl+Z/Y for undo/redo
 
-### Dark Mode ??
-- Click the **?? Dark** button in the toolbar to switch to Dark Mode
-- The button changes to **?? Light** when in Dark Mode
+### Dark Mode 🌙
+- Click the **🌙 Dark** button in the toolbar to switch to Dark Mode
+- The button changes to **☀️ Light** when in Dark Mode
 - Dark Mode affects:
   - Application UI (toolbar, editor, background)
   - Mermaid diagram theme (renders with dark theme)
@@ -62,16 +67,56 @@ Invoke-WebRequest -Uri "https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg
 - The diagram will appear in the right pane with zoom & pan controls
 - Diagrams automatically use the current theme (light or dark)
 
+### Pan & Select Modes
+- **✋ Pan Mode (H)**: Default mode - click and drag to pan, zoom with mouse wheel
+- **⊙ Select Mode (V)**: Switch to this mode to select and copy text from diagrams
+- Toggle between modes using the buttons in the zoom controls or press **H** / **V** keys
+
 ### Zoom & Pan Controls
-- ??? **Mouse Wheel**: Zoom in/out
-- ??? **Click + Drag**: Pan around the diagram
-- ?? **Double Click**: Reset view (fit and center)
+- 🔍 **Mouse Wheel**: Zoom in/out
+- ✋ **Click + Drag**: Pan around the diagram (in Pan mode)
+- 🔄 **Double Click**: Reset view (fit and center)
 
 ### Keyboard Shortcuts
+
+#### File Operations
+- **Ctrl+N**: New tab
+- **Ctrl+O**: Open file
 - **Ctrl+S**: Save file
-- **F5**: Render diagram
-- **Ctrl++** or **Ctrl+=**: Increase editor font size
-- **Ctrl+-**: Decrease editor font size
+- **Ctrl+Shift+S**: Save As
+- **Ctrl+Alt+S**: Save All tabs
+- **Ctrl+W**: Close tab
+
+#### Editing
+- **Ctrl+Z**: Undo
+- **Ctrl+Y**: Redo
+- **Ctrl+F**: Find
+- **Ctrl+H**: Replace
+- **Ctrl+G**: Go to Line
+- **Ctrl+/**: Toggle comment
+- **F3**: Find next
+- **Shift+F3**: Find previous
+
+#### View & Theme
+- **Ctrl+1**: Split view (Editor + Preview)
+- **Ctrl+2**: Editor only
+- **Ctrl+3**: Preview only
+- **Ctrl+Shift+T**: Toggle Editor theme
+- **Ctrl+Alt+T**: Toggle Preview theme
+
+#### Pan & Select Modes
+- **H**: Pan mode (hand)
+- **V**: Select mode (text cursor)
+
+#### Rendering & Export
+- **F5** or **Ctrl+Enter**: Render diagram
+- **Ctrl+Shift+V**: Export SVG
+- **Ctrl+Shift+P**: Export PNG
+
+#### Zoom Controls
+- **Ctrl++** or **Ctrl+=**: Zoom in
+- **Ctrl+-**: Zoom out
+- **Ctrl+0**: Fit to view
 
 ### Font Size
 - Use toolbar buttons **A-** and **A+** to adjust editor font size
