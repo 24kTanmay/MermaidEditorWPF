@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/repo-logo.png" alt="Mermaid Editor Logo" width="200"/>
+</p>
+
 # Mermaid Diagram Editor
 
 A WPF application for creating and rendering Mermaid diagrams with live preview, zoom & pan support, and Dark Mode.
