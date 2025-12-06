@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MermaidEditor - Lightweight Native Diagram Editor</title>
+    
+    <!-- Fonts: Inter (UI) and Newsreader (Serif for that "Skiff/Editorial" look) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Newsreader', 'serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        'brand-bg': '#F9FAFB',
+                        'brand-accent': '#8b5cf6', // Soft Purple
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 40px -10px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 60px -15px rgba(139, 92, 246, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F9FAFB;
+            overflow-x: hidden;
+        }
+        
+        /* Smooth Gradient Text */
+        .text-gradient {
+            background: linear-gradient(135deg, #1f2937 0%, #6b7280 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        /* Pulse Animation for Download Button */
+        @keyframes softPulse {
+            0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(139, 92, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+        }
+        .btn-pulse {
+            animation: softPulse 2s infinite;
+        }
+
+        /* Code Editor Cursor */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #a855f7;
+            animation: blink 1s step-end infinite;
+            vertical-align: middle;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Glassmorphism Overlay for Video */
+        .glass-overlay {
+            background: linear-gradient(to bottom, rgba(249,250,251,0.9) 0%, rgba(249,250,251,0.6) 50%, rgba(249,250,251,1) 100%);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800">
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center transition-all duration-300" id="navbar">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md">M</div>
+            <span class="font-semibold text-lg tracking-tight">MermaidEditor</span>
+        </div>
+        <a href="#" class="text-sm font-medium text-gray-600 hover:text-black transition-colors">GitHub v1.0</a>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden">
+        
+        <!-- Background Video Placeholder -->
+        <div class="absolute inset-0 z-0">
+            <!-- Replace 'video.mp4' with your actual video file -->
+            <video autoplay loop muted playsinline class="w-full h-full object-cover opacity-30">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-white-abstract-technology-lines-background-2768-large.mp4" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 glass-overlay"></div>
+        </div>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 text-center max-w-4xl px-4 mt-10">
+            <div class="hero-text opacity-0 translate-y-10">
+                <span class="inline-block py-1 px-3 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold mb-6 border border-purple-200">
+                    New: Version 1.0 for Windows
+                </span>
+                <h1 class="font-serif text-5xl md:text-7xl leading-[1.1] text-gray-900 mb-6">
+                    The <span class="italic text-purple-600">native</span> way to <br> write diagrams.
+                </h1>
+                <p class="text-lg md:text-xl text-gray-500 mb-8 max-w-2xl mx-auto font-light">
+                    Fast. Offline. Privacy-first. A lightweight Mermaid.js editor built specifically for Windows performance.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button class="bg-gray-900 text-white px-8 py-3.5 rounded-full font-medium hover:bg-black transition-transform hover:scale-105 active:scale-95 shadow-lg flex items-center gap-2">
+                        <span>Download for Windows</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </button>
+                    <button class="bg-white text-gray-700 border border-gray-200 px-8 py-3.5 rounded-full font-medium hover:bg-gray-50 transition-all hover:border-gray-300 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        <span>View on GitHub</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Floating App Mockup -->
+            <div class="hero-mockup mt-16 relative perspective-1000 opacity-0 translate-y-20">
+                <!-- Glow Effect behind -->
+                <div class="absolute inset-0 bg-purple-500 blur-[80px] opacity-20 rounded-full"></div>
+                
+                <div class="relative bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden mx-auto max-w-5xl aspect-[16/10]">
+                    <!-- Fake Window Header -->
+                    <div class="h-10 bg-gray-50 border-b border-gray-100 flex items-center px-4 gap-2">
+                        <div class="flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                        </div>
+                        <div class="mx-auto text-xs text-gray-400 font-medium">flowchart.mmd — MermaidEditor</div>
+                    </div>
+                    <!-- Fake App Content (Image Placeholder) -->
+                    <div class="w-full h-full bg-white flex">
+                        <!-- Sidebar -->
+                        <div class="w-16 border-r border-gray-100 hidden md:flex flex-col items-center py-4 gap-4">
+                            <div class="w-8 h-8 rounded bg-purple-100 text-purple-600 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                            </div>
+                            <div class="w-8 h-8 rounded hover:bg-gray-100 text-gray-400 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            </div>
+                        </div>
+                        <!-- Code Area -->
+                        <div class="flex-1 bg-gray-50 p-6 font-mono text-sm text-gray-600 hidden sm:block">
+                            <span class="text-purple-600">graph</span> TD<br>
+                            &nbsp;&nbsp;A[Client] --> B[Load Balancer]<br>
+                            &nbsp;&nbsp;B --> C[Server 01]<br>
+                            &nbsp;&nbsp;B --> D[Server 02]<br>
+                            &nbsp;&nbsp;C --> E[(Database)]
+                        </div>
+                        <!-- Preview Area -->
+                        <div class="flex-1 bg-white p-6 flex items-center justify-center border-l border-gray-100">
+                            <!-- Simple SVG Diagram Representation -->
+                            <svg width="200" height="150" viewBox="0 0 200 150">
+                                <rect x="80" y="10" width="40" height="20" rx="4" fill="#E9D5FF" stroke="#9333EA" stroke-width="2"/>
+                                <line x1="100" y1="30" x2="100" y2="50" stroke="#CBD5E1" stroke-width="2"/>
+                                <rect x="60" y="50" width="80" height="20" rx="4" fill="#E9D5FF" stroke="#9333EA" stroke-width="2"/>
+                                <line x1="100" y1="70" x2="60" y2="100" stroke="#CBD5E1" stroke-width="2"/>
+                                <line x1="100" y1="70" x2="140" y2="100" stroke="#CBD5E1" stroke-width="2"/>
+                                <rect x="30" y="100" width="40" height="20" rx="4" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2"/>
+                                <rect x="130" y="100" width="40" height="20" rx="4" fill="#F3F4F6" stroke="#9CA3AF" stroke-width="2"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Grid -->
+    <section class="py-24 px-4 bg-white relative z-20">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <!-- Feature 1 -->
+                <div class="feature-card bg-gray-50 p-8 rounded-3xl border border-gray-100 hover:shadow-lg transition-shadow duration-300 opacity-0 translate-y-10">
+                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 text-purple-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="font-serif text-xl font-medium mb-2">Native Performance</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Built with Rust bindings for instant startup times. No heavy Electron overhead.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="feature-card bg-gray-50 p-8 rounded-3xl border border-gray-100 hover:shadow-lg transition-shadow duration-300 opacity-0 translate-y-10">
+                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 text-blue-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </div>
+                    <h3 class="font-serif text-xl font-medium mb-2">Live Preview</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Utilizing WebView2 for pixel-perfect rendering that updates as you type.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="feature-card bg-gray-50 p-8 rounded-3xl border border-gray-100 hover:shadow-lg transition-shadow duration-300 opacity-0 translate-y-10">
+                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 text-pink-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <h3 class="font-serif text-xl font-medium mb-2">Export Ready</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">Export to SVG, PNG, or PDF in one click. High resolution for documentation.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="feature-card bg-gray-50 p-8 rounded-3xl border border-gray-100 hover:shadow-lg transition-shadow duration-300 opacity-0 translate-y-10">
+                    <div class="w-12 h-12 bg-white rounded-xl shadow-sm flex items-center justify-center mb-6 text-green-500">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                    <h3 class="font-serif text-xl font-medium mb-2">Tiny Footprint</h3>
+                    <p class="text-sm text-gray-500 leading-relaxed">A ~3MB installer. No bloatware, no tracking, just a diagram editor.</p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo / Animation Section -->
+    <section class="py-24 bg-gray-50 overflow-hidden" id="demo-section">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="font-serif text-4xl mb-4">Type code. Get art.</h2>
+                <p class="text-gray-500">The editor handles the layout automatically.</p>
+            </div>
+
+            <div class="flex flex-col md:flex-row rounded-2xl overflow-hidden shadow-2xl border border-gray-200 h-[400px] bg-white">
+                
+                <!-- Code Side (Typewriter Effect) -->
+                <div class="w-full md:w-1/2 bg-[#1e1e1e] p-8 font-mono text-sm text-gray-300 relative">
+                    <div class="absolute top-4 left-4 flex gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500 opacity-50"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500 opacity-50"></div>
+                    </div>
+                    <div class="mt-8">
+                        <div id="code-content" class="whitespace-pre-wrap"></div><span class="cursor"></span>
+                    </div>
+                </div>
+
+                <!-- Preview Side (Auto Draw) -->
+                <div class="w-full md:w-1/2 bg-white p-8 flex items-center justify-center relative">
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-50 to-blue-50 opacity-50"></div>
+                    
+                    <!-- SVG Diagram that animates in -->
+                    <svg id="demo-svg" width="300" height="200" viewBox="0 0 300 200" class="relative z-10">
+                        <defs>
+                            <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                              <polygon points="0 0, 10 3.5, 0 7" fill="#9ca3af" />
+                            </marker>
+                        </defs>
+                        
+                        <!-- Node A -->
+                        <g class="diagram-node opacity-0" id="node-a">
+                            <rect x="110" y="20" width="80" height="40" rx="6" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+                            <text x="150" y="45" text-anchor="middle" font-family="Inter" font-size="12" fill="#374151">Start</text>
+                        </g>
+
+                        <!-- Line 1 -->
+                        <line class="diagram-line opacity-0" id="line-1" x1="150" y1="60" x2="150" y2="90" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Node B -->
+                        <g class="diagram-node opacity-0" id="node-b">
+                            <polygon points="150,90 200,115 150,140 100,115" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+                            <text x="150" y="120" text-anchor="middle" font-family="Inter" font-size="12" fill="#374151">Check?</text>
+                        </g>
+
+                        <!-- Line 2 & 3 -->
+                        <line class="diagram-line opacity-0" id="line-2" x1="100" y1="115" x2="60" y2="115" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        <line class="diagram-line opacity-0" id="line-3" x1="200" y1="115" x2="240" y2="115" stroke="#9ca3af" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                        <!-- Node C & D -->
+                        <g class="diagram-node opacity-0" id="node-c">
+                            <rect x="10" y="95" width="50" height="40" rx="6" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+                            <text x="35" y="120" text-anchor="middle" font-family="Inter" font-size="12" fill="#374151">Yes</text>
+                        </g>
+                        <g class="diagram-node opacity-0" id="node-d">
+                            <rect x="240" y="95" width="50" height="40" rx="6" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+                            <text x="265" y="120" text-anchor="middle" font-family="Inter" font-size="12" fill="#374151">No</text>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="py-32 px-4 text-center">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="font-serif text-5xl mb-8">Ready to flow?</h2>
+            
+            <div class="flex flex-col items-center gap-6">
+                <button class="btn-pulse bg-gray-900 text-white px-10 py-4 rounded-full text-lg font-medium hover:bg-black transition-all flex items-center gap-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download for Windows
+                </button>
+                
+                <div class="flex items-center gap-2 text-sm text-gray-500 bg-gray-100 px-4 py-2 rounded-full">
+                    <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12z"/></svg>
+                    Supports Windows 10 & 11 (x64)
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 py-12 bg-white">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-gray-500">
+                &copy; 2023 MermaidEditor. Open Source under MIT.
+            </div>
+            <div class="flex gap-6">
+                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors">Documentation</a>
+                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors">GitHub</a>
+                <a href="#" class="text-gray-400 hover:text-gray-900 transition-colors">Donate</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Animation Logic -->
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // 1. Hero Animations on Load
+        const heroTl = gsap.timeline();
+
+        heroTl.to(".hero-text", {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power3.out",
+            delay: 0.2
+        })
+        .to(".hero-mockup", {
+            opacity: 1,
+            y: 0,
+            rotationX: 10, // Slight 3D tilt start
+            duration: 1.2,
+            ease: "power3.out"
+        }, "-=0.5")
+        .to(".hero-mockup", {
+            rotationX: 0, // Settle flat
+            duration: 1.5,
+            ease: "elastic.out(1, 0.5)"
+        }, "-=0.8");
+
+        // 2. Features Scroll Reveal
+        gsap.to(".feature-card", {
+            scrollTrigger: {
+                trigger: ".feature-card",
+                start: "top 85%",
+            },
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: "back.out(1.7)"
+        });
+
+        // 3. Demo Section Typing & Drawing Logic
+        const codeText = "graph TD\n  Start --> Check?\n  Check? -->|Yes| Yes\n  Check? -->|No| No";
+        const codeEl = document.getElementById('code-content');
+        
+        ScrollTrigger.create({
+            trigger: "#demo-section",
+            start: "center center", // When section is centered
+            onEnter: () => {
+                // Typewriter Effect
+                let i = 0;
+                codeEl.innerHTML = "";
+                const typeInterval = setInterval(() => {
+                    codeEl.innerHTML += codeText.charAt(i);
+                    i++;
+                    
+                    // Trigger Diagram Animations based on progress
+                    if(i === 8) gsap.to("#node-a", {opacity: 1, y: 0, duration: 0.5, ease: "back.out"});
+                    if(i === 20) gsap.to("#line-1", {opacity: 1, duration: 0.3});
+                    if(i === 25) gsap.to("#node-b", {opacity: 1, duration: 0.5, ease: "back.out"});
+                    if(i === 40) {
+                        gsap.to("#line-2", {opacity: 1, duration: 0.3});
+                        gsap.to("#node-c", {opacity: 1, duration: 0.5, ease: "back.out"});
+                    }
+                    if(i === 60) {
+                        gsap.to("#line-3", {opacity: 1, duration: 0.3});
+                        gsap.to("#node-d", {opacity: 1, duration: 0.5, ease: "back.out"});
+                    }
+
+                    if (i >= codeText.length) clearInterval(typeInterval);
+                }, 50); // Typing speed
+            }
+        });
+
+        // 4. Navbar Blur on Scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('bg-white/80', 'backdrop-blur-md', 'border-b', 'border-gray-100');
+            } else {
+                nav.classList.remove('bg-white/80', 'backdrop-blur-md', 'border-b', 'border-gray-100');
+            }
+        });
+    </script>
+</body>
+</html>

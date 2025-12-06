@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <NoWarn>NU1701</NoWarn>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    
+    <!-- App Identity -->
+    <AssemblyName>MermaidEditor</AssemblyName>
+    <RootNamespace>Mermaid</RootNamespace>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0</Version>
+    <Product>Mermaid Diagram Editor</Product>
+    <Company>Your Company</Company>
+    <Copyright>Copyright © 2025</Copyright>
+    <Description>A modern WPF application for creating and rendering Mermaid diagrams with live preview</Description>
+    <ApplicationIcon>Assets\Mermaid.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3595.46" />
+    <PackageReference Include="ICSharpCode.AvalonEdit" Version="4.3.0-alpha-00000000" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Mermaid\**" />
+    <Page Remove="Mermaid\**" />
+    <EmbeddedResource Remove="Mermaid\**" />
+    <None Remove="Mermaid\**" />
+    <Compile Remove="_Backup\**" />
+    <Page Remove="_Backup\**" />
+    <EmbeddedResource Remove="_Backup\**" />
+    <None Remove="_Backup\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="mermaid.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="svg-pan-zoom.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Resource Include="Assets\Mermaid.ico" />
+  </ItemGroup>
+
+  <!-- Ignore missing icon file during build -->
+  <PropertyGroup>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+  </PropertyGroup>
+
+</Project>

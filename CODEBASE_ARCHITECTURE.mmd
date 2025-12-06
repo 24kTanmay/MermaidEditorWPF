@@ -1,0 +1,266 @@
+flowchart TB
+    Start([Application Start]) --> App[App.xaml.cs<br/>Entry Point]
+    
+    App --> |Parse CLI Args| CheckArgs{Startup File<br/>Provided?}
+    CheckArgs --> |Yes| LoadFile[Load Startup File]
+    CheckArgs --> |No| DefaultTab[Create Default Tab]
+    
+    LoadFile --> MainWin[MainWindow.xaml.cs<br/>Main Application Window]
+    DefaultTab --> MainWin
+    
+    %% Main Window Initialization
+    MainWin --> Init[Initialize Components]
+    Init --> InitWebView[Initialize WebView2<br/>for Preview]
+    Init --> LoadRecent[Load Recent Files<br/>from AppData]
+    Init --> SetupUI[Setup UI Theme<br/>Dark Title Bar]
+    Init --> ConfigMenus[Configure Menus<br/>Left-Aligned Fix]
+    
+    %% Core Components
+    MainWin --> TabManager[Tab Management<br/>System]
+    MainWin --> EditorComp[Text Editor<br/>AvalonEdit Component]
+    MainWin --> PreviewComp[Preview Panel<br/>WebView2 + Mermaid.js]
+    MainWin --> ThemeSystem[Theme System<br/>Dark/Light Modes]
+    
+    %% Tab Management Module
+    TabManager --> AddTab[AddNewTab<br/>Create Editor Instance]
+    TabManager --> CloseTab[CloseTab<br/>Confirm Save Dialog]
+    TabManager --> SwitchTab[Tab Selection Changed<br/>Update Preview]
+    TabManager --> UpdateHeader[UpdateTabHeader<br/>Show Modified State]
+    
+    AddTab --> CreateEditor[Create TextEditor<br/>JetBrains Mono Font<br/>Line Numbers<br/>Syntax Highlighting]
+    CloseTab --> ConfirmDialog[ConfirmSaveDialog.xaml<br/>Yes/No/Cancel]
+    
+    %% File Operations Module
+    MainWin --> FileOps[File Operations<br/>Module]
+    FileOps --> NewFile[New File<br/>Ctrl+N]
+    FileOps --> OpenFile[Open File<br/>Ctrl+O<br/>File Dialog]
+    FileOps --> SaveFile[Save File<br/>Ctrl+S]
+    FileOps --> SaveAs[Save As<br/>Ctrl+Shift+S]
+    FileOps --> SaveAll[Save All Tabs<br/>Ctrl+Alt+S]
+    FileOps --> RecentFiles[Recent Files<br/>Menu Management]
+    
+    RecentFiles --> RecentStorage[(Recent Files Storage<br/>AppData/MermaidProDesktop/recent.txt)]
+    RecentFiles --> OpenRecent[Open Recent File]
+    RecentFiles --> ClearRecent[Clear Recent List]
+    
+    SaveFile --> CheckPath{File Path<br/>Exists?}
+    CheckPath --> |Yes| WriteFile[Write to File<br/>Update UndoStack]
+    CheckPath --> |No| SaveAs
+    SaveAs --> SaveDialog[SaveFileDialog<br/>.mmd or .txt]
+    WriteFile --> MarkOriginal[Mark as Original<br/>Clear Modified Flag]
+    SaveDialog --> WriteFile
+    
+    %% Editor Module
+    EditorComp --> EditorFeatures[Editor Features]
+    EditorFeatures --> SyntaxHL[Syntax Highlighting<br/>Custom XSHD Schema<br/>Keywords/Comments/Strings]
+    EditorFeatures --> LineHL[Current Line Highlight<br/>Custom Renderer]
+    EditorFeatures --> FontControl[Font Size Control<br/>Ctrl+MouseWheel<br/>Min: 8, Max: 48]
+    EditorFeatures --> CursorPos[Cursor Position<br/>Line/Col Display]
+    EditorFeatures --> WordWrap[Word Wrap<br/>Horizontal Scroll]
+    
+    SyntaxHL --> DarkSyntax[Dark Mode Syntax<br/>Keywords: #569CD6<br/>Comments: #6A9955]
+    SyntaxHL --> LightSyntax[Light Mode Syntax<br/>Keywords: #0000FF<br/>Comments: #008000]
+    
+    %% Search & Replace Module
+    MainWin --> SearchModule[Search & Replace<br/>Module]
+    SearchModule --> OpenSearch[Open Search Panel<br/>Ctrl+F]
+    SearchModule --> OpenReplace[Open Replace Panel<br/>Ctrl+H]
+    SearchModule --> PerformSearch[Search Text<br/>Case Sensitive Option]
+    SearchModule --> FindNext[Find Next<br/>F3]
+    SearchModule --> FindPrev[Find Previous<br/>Shift+F3]
+    SearchModule --> ReplaceOne[Replace Current]
+    SearchModule --> ReplaceAll[Replace All<br/>Ctrl+Alt+Enter]
+    SearchModule --> GoToLine[Go To Line<br/>Ctrl+G]
+    
+    GoToLine --> GoToDialog[GoToLineDialog.xaml<br/>Line Number Input]
+    GoToDialog --> ScrollToLine[Scroll to Line<br/>Select Position]
+    
+    PerformSearch --> SearchResults[Store Search Results<br/>Highlight Matches]
+    SearchResults --> HighLight[Highlight Current Result<br/>Yellow Background]
+    
+    %% Edit Operations Module
+    MainWin --> EditOps[Edit Operations<br/>Module]
+    EditOps --> UndoRedo[Undo/Redo<br/>Ctrl+Z/Ctrl+Y<br/>UndoStack]
+    EditOps --> CutCopyPaste[Cut/Copy/Paste<br/>Ctrl+X/C/V]
+    EditOps --> SelectAll[Select All<br/>Ctrl+A]
+    EditOps --> CommentToggle[Toggle Comment<br/>Ctrl+/<br/>%% Comment Syntax]
+    EditOps --> DuplicateLine[Duplicate Line<br/>Ctrl+D]
+    EditOps --> DeleteLine[Delete Line<br/>Ctrl+Shift+K]
+    EditOps --> MoveLineUp[Move Line Up<br/>Alt+Up]
+    EditOps --> MoveLineDown[Move Line Down<br/>Alt+Down]
+    EditOps --> Indent[Indent/Outdent<br/>Tab/Shift+Tab]
+    
+    %% Preview & Rendering Module
+    PreviewComp --> RenderModule[Rendering Module]
+    RenderModule --> RenderTrigger[Render Diagram<br/>F5 or Ctrl+Enter]
+    RenderModule --> AutoRender[Auto Render<br/>On Tab Switch]
+    RenderModule --> LayoutEngine[Layout Engine<br/>Dagre/ELK]
+    RenderModule --> TextSelection[Text Selection<br/>Enabled in SVG]
+    
+    TextSelection --> EnableSelection[user-select: text<br/>CSS on SVG text elements]
+    TextSelection --> ContextMenu[Context Menu Enabled<br/>Copy Support]
+    
+    RenderTrigger --> GetCode[Get Editor Text<br/>Current Tab]
+    GetCode --> ValidateCode{Code<br/>Empty?}
+    ValidateCode --> |Yes| EmptyMsg[Show Empty Message]
+    ValidateCode --> |No| BuildHTML[Build HTML Content]
+    
+    BuildHTML --> EmbedMermaid[Embed Mermaid.js<br/>v11.4.1]
+    BuildHTML --> EmbedPanZoom[Embed svg-pan-zoom.js<br/>v3.6.1]
+    BuildHTML --> ApplyTheme[Apply Theme<br/>Dark/Light]
+    BuildHTML --> EncodeCode[HTML Encode Code<br/>Prevent Injection]
+    
+    EmbedMermaid --> InitMermaid[Initialize Mermaid<br/>mermaid.initialize]
+    InitMermaid --> RenderSVG[Render to SVG<br/>mermaid.render]
+    RenderSVG --> AttachPanZoom[Attach Pan/Zoom<br/>svgPanZoom]
+    
+    AttachPanZoom --> DisplayPreview[Display in WebView2<br/>NavigateToString]
+    DisplayPreview --> ReadySignal[Send Ready Signal<br/>data-rendered='true']
+    
+    ReadySignal --> ZoomControls[Zoom Controls UI<br/>+/-/Fit/Reset Buttons]
+    
+    %% Export Module
+    MainWin --> ExportModule[Export Module]
+    ExportModule --> ExportSVG[Export SVG<br/>Ctrl+Shift+P]
+    ExportModule --> ExportPNG[Export PNG<br/>Image Capture]
+    
+    ExportSVG --> ForceLight{Current Theme<br/>Dark?}
+    ForceLight --> |Yes| TempRender[Temporary Light Render]
+    ForceLight --> |No| ExtractSVG[Extract SVG from DOM]
+    TempRender --> WaitRender[Wait for Render Complete<br/>Check data-rendered]
+    WaitRender --> ExtractSVG
+    ExtractSVG --> SVGDialog[SaveFileDialog<br/>.svg]
+    SVGDialog --> WriteSVG[Write SVG File]
+    WriteSVG --> RestoreTheme[Restore Original Theme]
+    
+    ExportPNG --> TempRenderPNG[Temporary Light Render]
+    TempRenderPNG --> CapturePreview[WebView2.CapturePreviewAsync<br/>PNG Format]
+    CapturePreview --> PNGDialog[SaveFileDialog<br/>.png]
+    PNGDialog --> WritePNG[Write PNG File]
+    WritePNG --> RestoreThemePNG[Restore Original Theme]
+    
+    WriteSVG --> SuccessDialog[MessageDialog.xaml<br/>Success Message]
+    WritePNG --> SuccessDialog
+    
+    %% Theme System Module
+    ThemeSystem --> EditorTheme[Editor Theme Toggle<br/>Button in Toolbar]
+    ThemeSystem --> PreviewTheme[Preview Theme Toggle<br/>Button in Toolbar]
+    
+    EditorTheme --> ApplyEditorTheme[Apply Editor Theme]
+    ApplyEditorTheme --> UpdateResources[Update App Resources<br/>Background/Foreground<br/>Colors]
+    ApplyEditorTheme --> UpdateSyntax[Update Syntax Highlighting<br/>Light/Dark Schema]
+    
+    PreviewTheme --> SetPreviewFlag[Set _isPreviewDarkMode<br/>Flag]
+    SetPreviewFlag --> ReRender[Re-render Diagram<br/>with New Theme]
+    
+    %% View Layout Module
+    MainWin --> ViewModule[View Layout<br/>Module]
+    ViewModule --> ViewSplit[Split View<br/>Editor + Preview]
+    ViewModule --> ViewEditorOnly[Editor Only<br/>Hide Preview]
+    ViewModule --> ViewPreviewOnly[Preview Only<br/>Hide Editor]
+    
+    ViewSplit --> GridLayout[Grid Layout<br/>50/50 Split<br/>Resizable Splitter]
+    ViewEditorOnly --> CollapsePreview[Collapse Preview Column<br/>Width = 0]
+    ViewPreviewOnly --> CollapseEditor[Collapse Editor Column<br/>Width = 0]
+    
+    %% Pan & Zoom Module
+    MainWin --> PanZoomModule[Pan & Zoom<br/>Module]
+    PanZoomModule --> ModeToggle[Mode Toggle<br/>Pan/Select]
+    PanZoomModule --> ZoomIn[Zoom In<br/>Button/JS]
+    PanZoomModule --> ZoomOut[Zoom Out<br/>Button/JS]
+    PanZoomModule --> FitView[Fit to View<br/>Button/JS]
+    PanZoomModule --> ResetZoom[Reset Zoom<br/>Button/JS]
+    PanZoomModule --> PanDrag[Pan by Drag<br/>Mouse/Touch]
+    
+    ModeToggle --> PanMode[Pan Mode - H<br/>Hand cursor<br/>Drag to pan<br/>No text selection]
+    ModeToggle --> SelectMode[Select Mode - V<br/>Text cursor<br/>Text selectable<br/>No panning]
+    
+    ZoomIn --> JSZoomIn[ExecuteScriptAsync<br/>panZoomInstance.zoomIn]
+    ZoomOut --> JSZoomOut[ExecuteScriptAsync<br/>panZoomInstance.zoomOut]
+    FitView --> JSFit[ExecuteScriptAsync<br/>fit + center]
+    ResetZoom --> JSReset[ExecuteScriptAsync<br/>reset]
+    
+    %% Help & Documentation Module
+    MainWin --> HelpModule[Help Module]
+    HelpModule --> VisitDocs[Visit Documentation<br/>mermaid.js.org]
+    HelpModule --> CheckUpdates[Check for Updates<br/>GitHub Releases]
+    HelpModule --> About[About Dialog<br/>Version Info]
+    
+    VisitDocs --> OpenBrowser[Open System Browser<br/>Process.Start]
+    CheckUpdates --> OpenBrowser
+    
+    %% Window Management Module
+    MainWin --> WindowModule[Window Management<br/>Module]
+    WindowModule --> Minimize[Minimize Button]
+    WindowModule --> Maximize[Maximize/Restore<br/>Button]
+    WindowModule --> Close[Close Button]
+    WindowModule --> DragMove[Drag Title Bar<br/>Move Window]
+    WindowModule --> Resize[Resize Borders<br/>8px Border]
+    
+    Close --> CloseApp{Unsaved<br/>Changes?}
+    CloseApp --> |Yes| ConfirmCloseAll[Confirm Save for<br/>All Tabs]
+    CloseApp --> |No| ExitApp[Exit Application]
+    ConfirmCloseAll --> |Save| SaveAllTabs[Save All Modified Tabs]
+    ConfirmCloseAll --> |Don't Save| ExitApp
+    ConfirmCloseAll --> |Cancel| CancelClose[Cancel Close]
+    SaveAllTabs --> ExitApp
+    
+    Maximize --> StateChanged[Window State Changed<br/>Event Handler]
+    StateChanged --> UpdateMargin[Update Grid Margin<br/>Adjust for Resize Border]
+    StateChanged --> UpdateTitleBar[Update Title Bar Height<br/>Update Button Icon]
+    StateChanged --> UpdateStatusBar[Update Status Bar Height<br/>Adjust Padding]
+    
+    %% Status Bar Module
+    MainWin --> StatusModule[Status Bar<br/>Module]
+    StatusModule --> CursorInfo[Cursor Position Display<br/>Ln X of Y, Col Z]
+    StatusModule --> Updates[Auto Update on<br/>Caret Position Change]
+    
+    %% Keyboard Shortcuts Summary
+    MainWin --> ShortcutsModule[Keyboard Shortcuts<br/>Handler]
+    ShortcutsModule --> FileShortcuts[File: Ctrl+N/O/S/W<br/>Ctrl+Shift+S<br/>Ctrl+Alt+S]
+    ShortcutsModule --> EditShortcuts[Edit: Ctrl+Z/Y/X/C/V/A<br/>Ctrl+D//<br/>Ctrl+Shift+K<br/>Alt+Up/Down]
+    ShortcutsModule --> SearchShortcuts[Search: Ctrl+F/H/G<br/>F3/Shift+F3]
+    ShortcutsModule --> ViewShortcuts[View Layout: Ctrl+1/2/3<br/>Zoom: Ctrl+=/−/0<br/>Mode: H/V for Pan/Select]
+    ShortcutsModule --> ThemeShortcuts[Theme: Ctrl+Shift+T<br/>Preview: Ctrl+Alt+T]
+    ShortcutsModule --> RenderShortcuts[Render: F5/Ctrl+Enter<br/>Export: Ctrl+Shift+P/V]
+    
+    %% Error Handling
+    MainWin --> ErrorModule[Error Handling<br/>Module]
+    ErrorModule --> RenderError[Mermaid Syntax Error<br/>Display in Preview]
+    ErrorModule --> FileError[File I/O Error<br/>MessageBox]
+    ErrorModule --> WebViewError[WebView2 Error<br/>Installation Check]
+    
+    RenderError --> ErrorDisplay[Show Error in Preview<br/>Red Border + Message]
+    FileError --> ErrorDialog[Show Error MessageBox]
+    
+    %% Data Flow
+    EditorComp -.Text Changes.-> TabManager
+    TabManager -.Modified Flag.-> UpdateHeader
+    EditorComp -.Text Content.-> RenderModule
+    RenderModule -.HTML Output.-> PreviewComp
+    PreviewComp -.Ready Event.-> ZoomControls
+    FileOps -.File Path.-> RecentFiles
+    RecentFiles -.File List.-> RecentStorage
+    
+    %% Dialogs Used
+    ConfirmDialog -.Result.-> CloseTab
+    GoToDialog -.Line Number.-> ScrollToLine
+    SuccessDialog -.OK.-> MainWin
+    SaveDialog -.File Path.-> WriteFile
+    SVGDialog -.File Path.-> WriteSVG
+    PNGDialog -.File Path.-> WritePNG
+    
+    %% External Resources
+    EmbedMermaid -.Load from Assembly.-> MermaidJS[(mermaid.js<br/>Embedded Resource)]
+    EmbedPanZoom -.Load from Assembly.-> PanZoomJS[(svg-pan-zoom.js<br/>Embedded Resource)]
+    
+    %% Styling
+    classDef moduleClass fill:#2d4a7c,stroke:#1e3a5f,stroke-width:2px,color:#fff
+    classDef dialogClass fill:#4a7c2d,stroke:#3a5f1e,stroke-width:2px,color:#fff
+    classDef dataClass fill:#7c4a2d,stroke:#5f3a1e,stroke-width:2px,color:#fff
+    classDef processClass fill:#7c2d4a,stroke:#5f1e3a,stroke-width:2px,color:#fff
+    
+    class TabManager,FileOps,EditorComp,PreviewComp,ThemeSystem,SearchModule,EditOps,RenderModule,ExportModule,ViewModule,PanZoomModule,HelpModule,WindowModule,StatusModule,ShortcutsModule,ErrorModule moduleClass
+    class ConfirmDialog,GoToDialog,SuccessDialog,SaveDialog,SVGDialog,PNGDialog,ErrorDialog dialogClass
+    class RecentStorage,MermaidJS,PanZoomJS dataClass
+    class RenderSVG,BuildHTML,ApplyTheme,ExtractSVG,CapturePreview processClass
